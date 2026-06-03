@@ -1,4 +1,4 @@
-# Sellfox MCP — 用 AI 助手管理亚马逊店铺
+# Sellfox MCP — 赛狐 MCP 用 AI 助手管理亚马逊店铺
 
 <p align="center">
   <br>
