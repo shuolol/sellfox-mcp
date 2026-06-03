@@ -1,0 +1,6 @@
+{
+  "env": {
+    "HUOKE_API_URL": "https://img.nice-token.com",
+    "HUOKE_API_KEY": "sk_7101e02c1a138261723aa45d5c81d9ba30c14a593864c9af"
+  }
+}
