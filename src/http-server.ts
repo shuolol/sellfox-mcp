@@ -225,8 +225,8 @@ async function callTool(app: SellfoxMCPApplication, name: string, args: Record<s
       return toolResult((await svc.adReportDownload(requiredText(args, "url"))) as unknown as Record<string, unknown>);
     case "sellfox_seller_lists": {
       const result = await svc.sellerLists();
-      if (apiKey && app.apiKeyMgr && !app.apiKeyMgr.isAdmin(apiKey)) {
-        const allowedIds = app.apiKeyMgr.getAuthorizedShopIds(apiKey);
+      if (apiKey && app.apiKeyMgr && !(await app.apiKeyMgr.isAdmin(apiKey))) {
+        const allowedIds = await app.apiKeyMgr.getAuthorizedShopIds(apiKey);
         const data = result.data as Record<string, unknown>[] | undefined;
         if (data) {
           result.data = data.filter((shop) => allowedIds.has(String(shop["shopId"] ?? "")));
@@ -260,7 +260,7 @@ async function main(): Promise<void> {
   const bearerToken = process.env["SELLFOX_MCP_BEARER_TOKEN"] ?? "";
   const tokensFile = process.env["SELLFOX_MCP_TOKENS_FILE"] ?? "";
 
-  const app = new SellfoxMCPApplication();
+  const app = await SellfoxMCPApplication.create();
   const auth = loadBearerAuthConfig({ bootstrap_token: bearerToken, tokens_file: tokensFile });
 
   const server = http.createServer(async (req, res) => {
@@ -336,7 +336,7 @@ async function handleRequest(
 
   let match: AuthMatch | null = authenticateHeader(auth, authorization);
   if (!match && app.apiKeyMgr && rawKey) {
-    if (app.apiKeyMgr.keyExists(rawKey)) {
+    if (await app.apiKeyMgr.keyExists(rawKey)) {
       match = { mode: "api_key", token_id: rawKey.slice(0, 12), description: "api_key" };
     }
   }
@@ -354,23 +354,19 @@ async function handleRequest(
 
   if (path.startsWith("/admin/api/credentials")) {
     if (!app.pool) { sendJSON(res, 503, { ok: false, error: "凭据池未启用" }); return; }
-    const { status, payload } = handleAdminApi(app.pool, method, path, body);
+    const { status, payload } = await handleAdminApi(app.pool, method, path, body);
     sendJSON(res, status, payload);
     return;
   }
 
   if (path.startsWith("/admin/api/keys") || path === "/admin/api/shops") {
     if (!app.apiKeyMgr) { sendJSON(res, 503, { ok: false, error: "密钥管理未启用" }); return; }
-    const result = handleKeyAdminApi(
+    const { status, payload } = await handleKeyAdminApi(
       app.apiKeyMgr,
       { sellerLists: () => app.service.sellerLists().then((r) => ({ data: (r.data ?? []) as Record<string, unknown>[] })) },
       method, path, body,
     );
-    if (result instanceof Promise) {
-      sendJSON(res, (await result).status, (await result).payload);
-    } else {
-      sendJSON(res, result.status, result.payload);
-    }
+    sendJSON(res, status, payload);
     return;
   }
 
@@ -394,13 +390,13 @@ async function handleRequest(
 
     // Shop permission enforcement
     if (app.apiKeyMgr && rawKey) {
-      const isAdmin = app.apiKeyMgr.isAdmin(rawKey);
+      const isAdmin = await app.apiKeyMgr.isAdmin(rawKey);
       if (request["method"] === "tools/call") {
         const params = (request["params"] ?? {}) as Record<string, unknown>;
         const toolName = String(params["name"] ?? "");
         const toolArgs = { ...(params["arguments"] ?? {}) } as Record<string, unknown>;
         const toolEntry = TOOL_LIST.find((t) => t.name === toolName);
-        const { allowed, error_message, modified_args } = resolveShopIdsForCall(
+        const { allowed, error_message, modified_args } = await resolveShopIdsForCall(
           app.apiKeyMgr, rawKey, toolArgs, toolEntry?.inputSchema ?? null,
         );
         console.log("[shop-permission] tool=%s rawKey=%s admin=%s allowed=%s hasModified=%s error=%s",

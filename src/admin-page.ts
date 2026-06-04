@@ -569,15 +569,15 @@ setInterval(refresh, 30000);
 
 // ---- Admin API handlers ----
 
-export function handleAdminApi(
+export async function handleAdminApi(
   pool: CredentialPool,
   method: string,
   path: string,
   body: Buffer | null,
-): { status: number; payload: Record<string, unknown> } {
+): Promise<{ status: number; payload: Record<string, unknown> }> {
   if (method === "GET" && path === "/admin/api/credentials") {
-    const records = pool.listAll();
-    const stats = pool.stats();
+    const records = await pool.listAll();
+    const stats = await pool.stats();
     return {
       status: 200,
       payload: {
@@ -614,7 +614,7 @@ export function handleAdminApi(
       if (!client_id || !secret) {
         return { status: 400, payload: { ok: false, error: "client_id 和 client_secret 不能为空" } };
       }
-      const ok = pool.add(client_id, secret);
+      const ok = await pool.add(client_id, secret);
       if (!ok) {
         return { status: 409, payload: { ok: false, error: `client_id '${client_id}' 已存在` } };
       }
@@ -622,19 +622,19 @@ export function handleAdminApi(
     }
 
     if (action === "remove") {
-      pool.remove(client_id);
-      pool.clearToken(client_id);
+      await pool.remove(client_id);
+      await pool.clearToken(client_id);
       return { status: 200, payload: { ok: true, action: "remove", client_id } };
     }
 
     if (action === "toggle") {
       const enabled = Boolean(data["enabled"]);
-      pool.setEnabled(client_id, enabled);
+      await pool.setEnabled(client_id, enabled);
       return { status: 200, payload: { ok: true, action: "toggle", client_id, enabled } };
     }
 
     if (action === "clear_token") {
-      pool.clearToken(client_id);
+      await pool.clearToken(client_id);
       return { status: 200, payload: { ok: true, action: "clear_token", client_id } };
     }
 
@@ -644,18 +644,18 @@ export function handleAdminApi(
   return { status: 405, payload: { ok: false, error: "method_not_allowed" } };
 }
 
-export function handleKeyAdminApi(
+export async function handleKeyAdminApi(
   apiKeyMgr: ApiKeyManager,
   service: { sellerLists(): Promise<{ data: Record<string, unknown>[] }> },
   method: string,
   path: string,
   body: Buffer | null,
-): { status: number; payload: Record<string, unknown> } | Promise<{ status: number; payload: Record<string, unknown> }> {
+): Promise<{ status: number; payload: Record<string, unknown> }> {
   // GET /admin/api/shops
   if (method === "GET" && path === "/admin/api/shops") {
     try {
-      const shops = apiKeyMgr.getCachedShops();
-      const syncInfo = apiKeyMgr.getShopSyncInfo();
+      const shops = await apiKeyMgr.getCachedShops();
+      const syncInfo = await apiKeyMgr.getShopSyncInfo();
       const shopsOut = shops.map((s) => ({
         shopId: s["shop_id"],
         shopName: s["shop_name"],
@@ -681,26 +681,29 @@ export function handleKeyAdminApi(
     }
     const action = String(data["action"] ?? "");
     if (action === "sync") {
-      return service.sellerLists().then((result) => {
+      try {
+        const result = await service.sellerLists();
         const shops = result.data;
-        const count = apiKeyMgr.syncShops(shops);
+        const count = await apiKeyMgr.syncShops(shops);
         return { status: 200, payload: { ok: true, action: "sync", count } };
-      }).catch((err) => {
+      } catch (err) {
         return { status: 500, payload: { ok: false, error: String(err) } };
-      });
+      }
     }
     return { status: 400, payload: { ok: false, error: `未知 action: ${action}` } };
   }
 
   // GET /admin/api/keys
   if (method === "GET" && path === "/admin/api/keys") {
-    const keys = apiKeyMgr.listKeys();
-    const stats = apiKeyMgr.stats();
-    const resultKeys = keys.map((k) => {
-      const kv = k["key_value"] as string;
-      const shops = apiKeyMgr.getAuthorizedShops(kv);
-      return { ...k, shop_count: shops.length, shops };
-    });
+    const keys = await apiKeyMgr.listKeys();
+    const stats = await apiKeyMgr.stats();
+    const resultKeys = await Promise.all(
+      keys.map(async (k) => {
+        const kv = k["key_value"] as string;
+        const shops = await apiKeyMgr.getAuthorizedShops(kv);
+        return { ...k, shop_count: shops.length, shops };
+      }),
+    );
     return { status: 200, payload: { ok: true, stats, keys: resultKeys } };
   }
 
@@ -720,21 +723,21 @@ export function handleKeyAdminApi(
       const seq = Number(data["seq"] ?? 0);
       const name = String(data["name"] ?? "").trim();
       const memo = String(data["memo"] ?? "").trim();
-      const is_admin = data["is_admin"] ? 1 : 0;
-      const generated = apiKeyMgr.addKey({ seq, name, key_value, memo, is_admin });
+      const is_admin = Boolean(data["is_admin"]);
+      const generated = await apiKeyMgr.addKey({ seq, name, key_value, memo, is_admin });
       return { status: 200, payload: { ok: true, action: "add", key_value: generated } };
     }
 
     if (action === "remove") {
       if (!key_value) return { status: 400, payload: { ok: false, error: "缺少 key_value" } };
-      apiKeyMgr.removeKey(key_value);
+      await apiKeyMgr.removeKey(key_value);
       return { status: 200, payload: { ok: true, action: "remove" } };
     }
 
     if (action === "toggle_admin") {
       if (!key_value) return { status: 400, payload: { ok: false, error: "缺少 key_value" } };
       const isAdmin = Boolean(data["is_admin"]);
-      apiKeyMgr.setAdmin(key_value, isAdmin);
+      await apiKeyMgr.setAdmin(key_value, isAdmin);
       return { status: 200, payload: { ok: true, action: "toggle_admin", is_admin: isAdmin } };
     }
 
@@ -744,7 +747,7 @@ export function handleKeyAdminApi(
 
     if (action === "get_permissions") {
       if (!key_value) return { status: 400, payload: { ok: false, error: "缺少 key_value" } };
-      const shops = apiKeyMgr.getAuthorizedShops(key_value);
+      const shops = await apiKeyMgr.getAuthorizedShops(key_value);
       return { status: 200, payload: { ok: true, shops } };
     }
 
@@ -756,7 +759,7 @@ export function handleKeyAdminApi(
         shop_id: String(s["shop_id"] ?? ""),
         shop_name: String(s["shop_name"] ?? ""),
       }));
-      apiKeyMgr.setShopPermissions(key_value, shops);
+      await apiKeyMgr.setShopPermissions(key_value, shops);
       return { status: 200, payload: { ok: true, action: "set_permissions", count: shops.length } };
     }
 
@@ -765,7 +768,7 @@ export function handleKeyAdminApi(
       const seq: number | undefined = data["seq"] != null ? Number(data["seq"]) : undefined;
       const name: string | undefined = String(data["name"] ?? "").trim() || undefined;
       const memo: string | undefined = String(data["memo"] ?? "").trim() || undefined;
-      apiKeyMgr.updateKey(key_value, { seq, name, memo });
+      await apiKeyMgr.updateKey(key_value, { seq, name, memo });
       return { status: 200, payload: { ok: true, action: "update" } };
     }
 

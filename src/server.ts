@@ -5,4 +5,5 @@
 
 import { SellfoxMCPApplication, runStdioServer } from "./mcp-server.js";
 
-runStdioServer(new SellfoxMCPApplication());
+const app = await SellfoxMCPApplication.create();
+runStdioServer(app);

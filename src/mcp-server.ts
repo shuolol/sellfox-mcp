@@ -13,6 +13,7 @@ import { ApiKeyManager } from "./api-key-manager.js";
 import { CredentialPool } from "./credential-pool.js";
 import { loadEnvFile, setupLogging } from "./client.js";
 import { SHOP_PARAM_NAMES } from "./shop-permission.js";
+import { initSchema, getPool } from "./db.js";
 
 export const SERVER_NAME = "sellfox-openapi";
 export const SERVER_VERSION = "0.1.0";
@@ -73,16 +74,16 @@ function toolErrorPayload(exc: unknown): Record<string, unknown> {
 
 // ---- Pool / API Key Manager factory ----
 
-function createPoolFromEnv(): CredentialPool | null {
-  const dbPath = (process.env["SELLFOX_CREDENTIAL_DB"] ?? "").trim();
-  if (!dbPath) return null;
-  return new CredentialPool(dbPath);
+async function createPoolFromEnv(): Promise<CredentialPool | null> {
+  if (!process.env["DATABASE_URL"] && !process.env["PGHOST"]) return null;
+  await initSchema();
+  return new CredentialPool();
 }
 
-function createApiKeyMgrFromEnv(): ApiKeyManager | null {
-  const dbPath = (process.env["SELLFOX_API_KEY_DB"] ?? "").trim();
-  if (!dbPath) return null;
-  return new ApiKeyManager(dbPath);
+async function createApiKeyMgrFromEnv(): Promise<ApiKeyManager | null> {
+  if (!process.env["DATABASE_URL"] && !process.env["PGHOST"]) return null;
+  await initSchema();
+  return new ApiKeyManager();
 }
 
 // ---- Zod schema builder from endpoint spec args ----
@@ -129,17 +130,20 @@ export class SellfoxMCPApplication {
   /** All tools (both hand-written and endpoint specs) indexed by name */
   readonly toolDefs: Map<string, { description: string; inputSchema: Record<string, unknown>; handler: (args: Record<string, unknown>) => Promise<Record<string, unknown>> }> = new Map();
 
-  constructor(service?: SellfoxOpenAPIService) {
+  constructor(
+    service?: SellfoxOpenAPIService,
+    pool?: CredentialPool | null,
+    apiKeyMgr?: ApiKeyManager | null,
+  ) {
     setupLogging();
     if (service) {
       this.service = service;
-      this.pool = null;
+      this.pool = pool ?? null;
     } else {
-      const pool = createPoolFromEnv();
-      this.pool = pool;
-      this.service = new SellfoxOpenAPIService(pool ? { credential_pool: pool } : {});
+      this.pool = pool ?? null;
+      this.service = new SellfoxOpenAPIService(this.pool ? { credential_pool: this.pool } : {});
     }
-    this.apiKeyMgr = createApiKeyMgrFromEnv();
+    this.apiKeyMgr = apiKeyMgr ?? null;
 
     this.mcpServer = new McpServer({
       name: SERVER_NAME,
@@ -148,6 +152,14 @@ export class SellfoxMCPApplication {
 
     this._registerHandWrittenTools();
     this._registerEndpointSpecTools();
+  }
+
+  static async create(service?: SellfoxOpenAPIService): Promise<SellfoxMCPApplication> {
+    setupLogging();
+    const pool = await createPoolFromEnv();
+    const apiKeyMgr = await createApiKeyMgrFromEnv();
+    const svc = service ?? new SellfoxOpenAPIService(pool ? { credential_pool: pool } : {});
+    return new SellfoxMCPApplication(svc, pool, apiKeyMgr);
   }
 
   private _registerHandWrittenTools(): void {
@@ -399,7 +411,7 @@ export class SellfoxMCPApplication {
               if (userShopIds == null || userShopIds === "" || (Array.isArray(userShopIds) && userShopIds.length === 0)) {
                 // Try API key manager's cached shops first
                 if (cachedShopIds === null) {
-                  const cached = apiKeyMgr.getCachedShops();
+                  const cached = await apiKeyMgr.getCachedShops();
                   cachedShopIds = cached.length > 0 ? cached.map((s) => String(s["shop_id"] ?? "")).filter(Boolean) : [];
                 }
                 if (cachedShopIds.length > 0) {
@@ -430,7 +442,7 @@ export class SellfoxMCPApplication {
 
 export async function runStdioServer(app?: SellfoxMCPApplication): Promise<void> {
   loadEnvFile();
-  const application = app ?? new SellfoxMCPApplication();
+  const application = app ?? (await SellfoxMCPApplication.create());
   await application.runStdio();
   // Keep the process alive (stdio transport keeps it open)
   await new Promise(() => {});

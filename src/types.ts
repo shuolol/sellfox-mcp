@@ -194,7 +194,7 @@ export interface ApiKeyRecord {
   name: string;
   key_value: string;
   memo: string;
-  is_admin: number;
+  is_admin: boolean;
   created_at: string;
 }
 

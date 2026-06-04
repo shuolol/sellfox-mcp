@@ -93,7 +93,7 @@ export class SellfoxOpenAPIService {
 
   // ---- Health check ----
 
-  healthCheck(): SellfoxResult {
+  async healthCheck(): Promise<SellfoxResult> {
     loadEnvFile();
     const envStatus = {
       SELLFOX_CLIENT_ID: Boolean((process.env["SELLFOX_CLIENT_ID"] ?? "").trim()),
@@ -115,7 +115,7 @@ export class SellfoxOpenAPIService {
 
     // Health check is synchronous — token check is read-only from cache
     if (ok) {
-      const cached = this.client.getCachedToken();
+      const cached = await this.client.getCachedToken();
       if (cached) {
         data["token_cache"] = { ...(data["token_cache"] as Record<string, unknown>), expires_at: cached.expires_at };
       }
@@ -325,7 +325,7 @@ export class SellfoxOpenAPIService {
 
   async smokeCheck(): Promise<SellfoxResult> {
     const warnings: string[] = [];
-    const health = this.healthCheck();
+    const health = await this.healthCheck();
     if (!health.ok) throw new SellfoxClientError("health_check 未通过，中止烟测", { endpoint: "smoke_check" });
 
     const today = new Date().toISOString().slice(0, 10);

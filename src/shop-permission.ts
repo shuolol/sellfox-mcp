@@ -12,16 +12,16 @@ export const SHOP_PARAM_NAMES = [
   "sellerId",
 ];
 
-export function resolveShopIdsForCall(
+export async function resolveShopIdsForCall(
   apiKeyMgr: ApiKeyManager,
   keyValue: string,
   toolArgs: Record<string, unknown>,
   toolInputSchema?: Record<string, unknown> | null,
-): { allowed: boolean; error_message?: string; modified_args?: Record<string, unknown> } {
-  const authorizedShopIds = apiKeyMgr.getAuthorizedShopIds(keyValue);
+): Promise<{ allowed: boolean; error_message?: string; modified_args?: Record<string, unknown> }> {
+  const authorizedShopIds = await apiKeyMgr.getAuthorizedShopIds(keyValue);
 
   // Admin keys bypass all shop restrictions
-  if (apiKeyMgr.isAdmin(keyValue)) {
+  if (await apiKeyMgr.isAdmin(keyValue)) {
     return { allowed: true };
   }
 
@@ -62,7 +62,7 @@ export function resolveShopIdsForCall(
 
   if (!shopIdsFromArgs || shopIdsFromArgs.length === 0) {
     // No shop IDs provided — auto-inject all authorized shops
-    const allShops = apiKeyMgr.getAuthorizedShops(keyValue);
+    const allShops = await apiKeyMgr.getAuthorizedShops(keyValue);
     if (allShops.length === 0) {
       return {
         allowed: false,

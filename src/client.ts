@@ -192,7 +192,7 @@ export class SellfoxOpenAPIClient {
 
   private async _refreshPoolCredential(): Promise<void> {
     if (!this._pool) return;
-    const [cid, csecret, cachedToken] = this._pool.acquireWithToken();
+    const [cid, csecret, cachedToken] = await this._pool.acquireWithToken();
     const now = Date.now() / 1000;
     const last = this._cred_last_used[cid] ?? 0;
     const wait = last + this._cred_min_interval - now;
@@ -208,10 +208,10 @@ export class SellfoxOpenAPIClient {
 
   // ---- Token cache ----
 
-  getCachedToken(): TokenBundle | null {
+  async getCachedToken(): Promise<TokenBundle | null> {
     if (this._pool) {
       if (this._pool_access_token != null) {
-        const cached = this._pool.getCachedToken(this.client_id);
+        const cached = await this._pool.getCachedToken(this.client_id);
         if (cached) {
           return makeTokenBundle(cached[0], cached[1]);
         }
@@ -231,9 +231,9 @@ export class SellfoxOpenAPIClient {
     }
   }
 
-  private _writeTokenCache(bundle: TokenBundle): void {
+  private async _writeTokenCache(bundle: TokenBundle): Promise<void> {
     if (this._pool) {
-      this._pool.updateToken(this.client_id, bundle.access_token, bundle.expires_at);
+      await this._pool.updateToken(this.client_id, bundle.access_token, bundle.expires_at);
       this._pool_access_token = bundle.access_token;
     }
     const dir = path.dirname(this.token_cache_file);
@@ -363,13 +363,13 @@ export class SellfoxOpenAPIClient {
       access_token,
       Math.floor(Date.now() / 1000) + Math.max(expires_in_seconds - 120, 60),
     );
-    this._writeTokenCache(bundle);
+    await this._writeTokenCache(bundle);
     logInfo("access_token 获取成功, 有效期 %ds", expires_in_seconds);
     return bundle;
   }
 
   async ensureAccessToken(): Promise<TokenBundle> {
-    const cached = this.getCachedToken();
+    const cached = await this.getCachedToken();
     if (cached && isTokenValid(cached)) return cached;
     return this.fetchAccessToken();
   }
