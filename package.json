@@ -1,15 +1,20 @@
 {
   "name": "sellfox-mcp-node",
   "version": "1.0.0",
-  "description": "",
+  "description": "Sellfox OpenAPI CLI & MCP server — Amazon seller tools",
   "type": "module",
   "main": "dist/server.js",
+  "bin": {
+    "sellfox": "dist/cli.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
     "start:http": "node dist/http-server.js",
     "dev": "tsx src/server.ts",
     "dev:http": "tsx src/http-server.ts",
+    "dev:cli": "tsx src/cli.ts",
+    "cli": "node dist/cli.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
