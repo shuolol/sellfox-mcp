@@ -271,6 +271,12 @@ async function main(): Promise<void> {
     }
   });
 
+  // 长时间分页请求需要足够的超时时间（默认 10 分钟）
+  server.timeout = parseInt(process.env["SELLFOX_HTTP_SERVER_TIMEOUT"] ?? "600000", 10);
+  server.keepAliveTimeout = parseInt(process.env["SELLFOX_HTTP_KEEPALIVE"] ?? "610000", 10);
+  server.headersTimeout = parseInt(process.env["SELLFOX_HTTP_HEADERS_TIMEOUT"] ?? "610000", 10);
+  server.requestTimeout = parseInt(process.env["SELLFOX_HTTP_REQUEST_TIMEOUT"] ?? "600000", 10);
+
   server.listen(port, host, () => {
     const display = host === "" || host === "0.0.0.0" ? "localhost" : host;
     const base = `http://${display}:${port}`;

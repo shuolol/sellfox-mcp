@@ -142,6 +142,15 @@ function isRetryable(statusCode: number, body: string): boolean {
   return false;
 }
 
+function isTokenExpiredError(err: unknown): boolean {
+  if (err instanceof SellfoxTransportError || err instanceof SellfoxRequestError) {
+    const code = String(err.code ?? "");
+    if (code === "401" || code === "40001") return true;
+    if (err.message.includes("40001") || err.message.includes("access_token")) return true;
+  }
+  return false;
+}
+
 // ---- Main client ----
 
 export class SellfoxOpenAPIClient {
@@ -183,7 +192,7 @@ export class SellfoxOpenAPIClient {
       process.env["SELLFOX_BASE_URL"] ??
       BASE_URL
     ).replace(/\/+$/, "");
-    this.timeout = options?.timeout ?? 30;
+    this.timeout = options?.timeout ?? parseInt(process.env["SELLFOX_REQUEST_TIMEOUT"] ?? "60", 10);
     this._cred_last_used = {};
     this._cred_min_interval = parseFloat(process.env["SELLFOX_RATE_LIMIT_INTERVAL"] ?? "1.1");
   }
@@ -409,22 +418,36 @@ export class SellfoxOpenAPIClient {
   ): Promise<Record<string, unknown>> {
     const normalizedPath = `/${rawPath.replace(/^\//, "")}`;
     const body = { ...(jsonBody ?? {}) };
-    logDebug("POST %s body: %s", normalizedPath, jsonDumps(body));
-    const signQuery = await this._buildSignQuery(normalizedPath, queryParams);
-    const query = new URLSearchParams(signQuery).toString();
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (extraHeaders) {
-      Object.assign(headers, extraHeaders);
+
+    const attempt = async (): Promise<Record<string, unknown>> => {
+      logDebug("POST %s body: %s", normalizedPath, jsonDumps(body));
+      const signQuery = await this._buildSignQuery(normalizedPath, queryParams);
+      const query = new URLSearchParams(signQuery).toString();
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (extraHeaders) {
+        Object.assign(headers, extraHeaders);
+      }
+      const payload = await this._request(`${this.base_url}${normalizedPath}?${query}`, {
+        method: "POST",
+        headers,
+        body: jsonDumps(body),
+        endpoint: normalizedPath,
+      });
+      this._ensureSuccess(payload, normalizedPath);
+      logDebug("POST %s response code=%s", normalizedPath, String(payload["code"] ?? ""));
+      return payload;
+    };
+
+    try {
+      return await attempt();
+    } catch (err) {
+      if (isTokenExpiredError(err)) {
+        logInfo("access_token 已失效(40001)，强制刷新后重试 %s", normalizedPath);
+        await this.fetchAccessToken();
+        return await attempt();
+      }
+      throw err;
     }
-    const payload = await this._request(`${this.base_url}${normalizedPath}?${query}`, {
-      method: "POST",
-      headers,
-      body: jsonDumps(body),
-      endpoint: normalizedPath,
-    });
-    this._ensureSuccess(payload, normalizedPath);
-    logDebug("POST %s response code=%s", normalizedPath, String(payload["code"] ?? ""));
-    return payload;
   }
 
   async getJSON(
@@ -433,15 +456,29 @@ export class SellfoxOpenAPIClient {
   ): Promise<Record<string, unknown>> {
     const normalizedPath = `/${rawPath.replace(/^\//, "")}`;
     const params = { ...(queryParams ?? {}) };
-    logDebug("GET %s params: %s", normalizedPath, jsonDumps(params));
-    const signQuery = await this._buildSignQuery(normalizedPath, params);
-    const query = new URLSearchParams(signQuery).toString();
-    const payload = await this._request(`${this.base_url}${normalizedPath}?${query}`, {
-      method: "GET",
-      endpoint: normalizedPath,
-    });
-    this._ensureSuccess(payload, normalizedPath);
-    return payload;
+
+    const attempt = async (): Promise<Record<string, unknown>> => {
+      logDebug("GET %s params: %s", normalizedPath, jsonDumps(params));
+      const signQuery = await this._buildSignQuery(normalizedPath, params);
+      const query = new URLSearchParams(signQuery).toString();
+      const payload = await this._request(`${this.base_url}${normalizedPath}?${query}`, {
+        method: "GET",
+        endpoint: normalizedPath,
+      });
+      this._ensureSuccess(payload, normalizedPath);
+      return payload;
+    };
+
+    try {
+      return await attempt();
+    } catch (err) {
+      if (isTokenExpiredError(err)) {
+        logInfo("access_token 已失效(40001)，强制刷新后重试 %s", normalizedPath);
+        await this.fetchAccessToken();
+        return await attempt();
+      }
+      throw err;
+    }
   }
 
   async pagedPost(
