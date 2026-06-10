@@ -4,6 +4,9 @@
 // ============================================================
 
 import * as http from "node:http";
+import * as fs from "node:fs";
+import * as nodePath from "node:path";
+import { fileURLToPath } from "node:url";
 import { SellfoxMCPApplication, SERVER_NAME, SERVER_VERSION } from "./mcp-server.js";
 import { loadEnvFile, setupLogging } from "./client.js";
 import { loadBearerAuthConfig, authSummary, authenticateHeader } from "./auth.js";
@@ -318,6 +321,29 @@ async function handleRequest(
   // Health check
   if (method === "GET" && path === "/healthz") {
     sendJSON(res, 200, { ok: true, server: SERVER_NAME, version: SERVER_VERSION, auth: authSummary(auth) });
+    return;
+  }
+
+  // Static assets (no auth required)
+  if (path === "/admin.css" && method === "GET") {
+    try {
+      const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
+      // Always serve compiled CSS from dist/; in dev (tsx), __dirname = src/
+      let cssPath = nodePath.resolve(__dirname, "..", "dist", "admin.css");
+      if (!fs.existsSync(cssPath)) {
+        // Fallback for when dist/ is also the cwd (e.g. compiled mode)
+        cssPath = nodePath.join(__dirname, "admin.css");
+      }
+      const css = fs.readFileSync(cssPath, "utf-8");
+      res.writeHead(200, {
+        "Content-Type": "text/css; charset=utf-8",
+        "Content-Length": String(Buffer.byteLength(css)),
+      });
+      res.end(css);
+    } catch {
+      res.writeHead(404);
+      res.end();
+    }
     return;
   }
 

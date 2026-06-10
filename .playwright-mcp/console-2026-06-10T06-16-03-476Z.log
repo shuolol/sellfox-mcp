@@ -1,0 +1,3 @@
+[      16ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://127.0.0.1:8099/favicon.ico:0
+[   35418ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:8099/admin?key=your_bearer_token:0
+[   62060ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:8099/admin/api/credentials?key=your_bearer_token:0

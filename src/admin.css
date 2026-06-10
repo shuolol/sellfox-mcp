@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Shadcn UI 暗色主题 (Zinc/Slate 色系)
+   ============================================================ */
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --radius: 0.5rem;
+  }
+
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; }
+}
+
+/* ============================================================
+   Shadcn 组件层 — 模仿 shadcn/ui 的组件风格
+   ============================================================ */
+@layer components {
+  /* Button variants — mirrors shadcn Button */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium
+           cursor-pointer transition-colors duration-150
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+           focus-visible:ring-offset-2 focus-visible:ring-offset-background
+           disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-primary text-primary-foreground border border-transparent shadow-sm
+           hover:opacity-90;
+  }
+  .btn-outline {
+    @apply border border-input bg-transparent text-foreground
+           hover:bg-accent hover:text-accent-foreground;
+  }
+  .btn-danger {
+    @apply border border-transparent bg-destructive text-destructive-foreground
+           hover:opacity-90;
+  }
+  .btn-ghost {
+    @apply border border-transparent bg-transparent text-foreground
+           hover:bg-accent hover:text-accent-foreground;
+  }
+  .btn-sm { @apply h-8 px-3 py-1 text-xs; }
+  .btn-xs { @apply h-7 px-2 py-0.5 text-[0.7rem]; }
+
+  /* Badge — mirrors shadcn Badge */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+           transition-colors;
+  }
+  .badge-green  { @apply bg-green-400/15 text-green-400; }
+  .badge-amber  { @apply bg-amber-400/15 text-amber-400; }
+  .badge-muted  { @apply bg-muted-foreground/15 text-muted-foreground; }
+  .badge-accent { @apply bg-primary/15 text-primary; }
+
+  /* Stat card — mirrors shadcn Card */
+  .stat-card {
+    @apply bg-card border border-border rounded-lg p-4 shadow-sm;
+  }
+  .stat-label {
+    @apply text-xs text-muted-foreground uppercase tracking-wider mb-1;
+  }
+  .stat-value {
+    @apply text-2xl font-bold;
+  }
+
+  /* Table wrapper — mirrors shadcn Table */
+  .table-wrap {
+    @apply bg-card border border-border rounded-lg overflow-hidden mb-4;
+  }
+
+  /* Toggle switch */
+  .toggle-track {
+    @apply relative inline-block w-10 h-[22px];
+  }
+  .toggle-track input {
+    @apply opacity-0 w-0 h-0;
+  }
+  .toggle-track .toggle-thumb {
+    @apply absolute cursor-pointer inset-0 rounded-full transition-colors duration-150;
+    background: hsl(240 5% 26%);
+  }
+  .toggle-track .toggle-thumb::before {
+    content: "";
+    @apply absolute h-4 w-4 left-[3px] bottom-[3px] bg-white rounded-full transition-transform duration-150;
+  }
+  .toggle-track input:checked + .toggle-thumb {
+    @apply bg-primary;
+  }
+  .toggle-track input:checked + .toggle-thumb::before {
+    transform: translateX(18px);
+  }
+
+  /* Toast */
+  .toast {
+    @apply fixed bottom-6 right-6 z-[200] px-5 py-3 text-sm rounded-md border
+           bg-card text-card-foreground;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    animation: toast-in 0.2s ease;
+  }
+  .toast-error { @apply border-destructive; }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4;
+  }
+  .modal {
+    @apply bg-card border border-border rounded-lg p-6 shadow-xl
+           w-[520px] max-w-[95vw] max-h-[85vh] overflow-y-auto;
+  }
+
+  /* Form controls */
+  .form-group {
+    @apply mb-3.5;
+  }
+  .form-label {
+    @apply block text-xs text-muted-foreground mb-1;
+  }
+  .form-input {
+    @apply w-full px-3 py-2 bg-background border border-input rounded-md
+           text-foreground text-sm
+           focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
+           focus:ring-offset-background
+           placeholder:text-muted-foreground;
+  }
+
+  /* Misc */
+  .reveal {
+    @apply cursor-pointer select-none text-muted-foreground px-1 hover:text-foreground;
+  }
+  .empty-state {
+    @apply text-center py-12 px-5 text-muted-foreground;
+  }
+  .mono {
+    @apply font-mono text-xs;
+  }
+  .copy-btn {
+    @apply cursor-pointer text-muted-foreground bg-transparent border-none text-sm p-1
+           hover:text-primary transition-colors;
+  }
+  .key-display {
+    @apply bg-background border border-input rounded-md px-3.5 py-2.5
+           flex items-center gap-2.5 mt-1.5;
+  }
+
+  /* Tab */
+  .tab-btn {
+    @apply px-5 py-2.5 text-sm font-medium cursor-pointer bg-transparent border-none
+           text-muted-foreground border-b-2 border-transparent
+           transition-all duration-150 hover:text-foreground;
+  }
+  .tab-btn.active {
+    @apply text-primary border-primary;
+  }
+}

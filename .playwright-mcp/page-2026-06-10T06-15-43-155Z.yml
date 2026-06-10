@@ -1,0 +1,94 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - heading "Sellfox 管理控制台" [level=1] [ref=e4]
+    - button "刷新" [ref=e6] [cursor=pointer]
+  - generic [ref=e7]:
+    - button "凭据管理" [active] [ref=e8] [cursor=pointer]
+    - button "密钥权限" [ref=e9] [cursor=pointer]
+  - generic [ref=e10]:
+    - button "+ 添加凭据" [ref=e12] [cursor=pointer]
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: 凭据总数
+        - generic [ref=e16]: "5"
+      - generic [ref=e17]:
+        - generic [ref=e18]: 已启用
+        - generic [ref=e19]: "5"
+      - generic [ref=e20]:
+        - generic [ref=e21]: Token 有效
+        - generic [ref=e22]: "0"
+    - table [ref=e24]:
+      - rowgroup [ref=e25]:
+        - row "Client ID Secret Token 最近使用 状态 操作" [ref=e26]:
+          - columnheader "Client ID" [ref=e27]
+          - columnheader "Secret" [ref=e28]
+          - columnheader "Token" [ref=e29]
+          - columnheader "最近使用" [ref=e30]
+          - columnheader "状态" [ref=e31]
+          - columnheader "操作" [ref=e32]
+      - rowgroup [ref=e33]:
+        - row "368067***👁 3be34a94***👁 已过期 5 小时前 清 Token 删除" [ref=e99]:
+          - cell "368067***👁" [ref=e100]
+          - cell "3be34a94***👁" [ref=e101]
+          - cell "已过期" [ref=e102]:
+            - generic [ref=e103]: 已过期
+          - cell "5 小时前" [ref=e104]
+          - cell [ref=e105]:
+            - generic [ref=e106]:
+              - checkbox [checked]
+          - cell "清 Token 删除" [ref=e108]:
+            - generic [ref=e109]:
+              - button "清 Token" [ref=e110] [cursor=pointer]
+              - button "删除" [ref=e111] [cursor=pointer]
+        - row "368461***👁 0a8ad580***👁 已过期 5 小时前 清 Token 删除" [ref=e112]:
+          - cell "368461***👁" [ref=e113]
+          - cell "0a8ad580***👁" [ref=e114]
+          - cell "已过期" [ref=e115]:
+            - generic [ref=e116]: 已过期
+          - cell "5 小时前" [ref=e117]
+          - cell [ref=e118]:
+            - generic [ref=e119]:
+              - checkbox [checked]
+          - cell "清 Token 删除" [ref=e121]:
+            - generic [ref=e122]:
+              - button "清 Token" [ref=e123] [cursor=pointer]
+              - button "删除" [ref=e124] [cursor=pointer]
+        - row "368525***👁 1aae1c97***👁 已过期 5 小时前 清 Token 删除" [ref=e125]:
+          - cell "368525***👁" [ref=e126]
+          - cell "1aae1c97***👁" [ref=e127]
+          - cell "已过期" [ref=e128]:
+            - generic [ref=e129]: 已过期
+          - cell "5 小时前" [ref=e130]
+          - cell [ref=e131]:
+            - generic [ref=e132]:
+              - checkbox [checked]
+          - cell "清 Token 删除" [ref=e134]:
+            - generic [ref=e135]:
+              - button "清 Token" [ref=e136] [cursor=pointer]
+              - button "删除" [ref=e137] [cursor=pointer]
+        - row "368526***👁 e2f3cc31***👁 已过期 6 分钟前 清 Token 删除" [ref=e138]:
+          - cell "368526***👁" [ref=e139]
+          - cell "e2f3cc31***👁" [ref=e140]
+          - cell "已过期" [ref=e141]:
+            - generic [ref=e142]: 已过期
+          - cell "6 分钟前" [ref=e143]
+          - cell [ref=e144]:
+            - generic [ref=e145]:
+              - checkbox [checked]
+          - cell "清 Token 删除" [ref=e147]:
+            - generic [ref=e148]:
+              - button "清 Token" [ref=e149] [cursor=pointer]
+              - button "删除" [ref=e150] [cursor=pointer]
+        - row "368462***👁 95010b8c***👁 已过期 6 分钟前 清 Token 删除" [ref=e151]:
+          - cell "368462***👁" [ref=e152]
+          - cell "95010b8c***👁" [ref=e153]
+          - cell "已过期" [ref=e154]:
+            - generic [ref=e155]: 已过期
+          - cell "6 分钟前" [ref=e156]
+          - cell [ref=e157]:
+            - generic [ref=e158]:
+              - checkbox [checked]
+          - cell "清 Token 删除" [ref=e160]:
+            - generic [ref=e161]:
+              - button "清 Token" [ref=e162] [cursor=pointer]
+              - button "删除" [ref=e163] [cursor=pointer]

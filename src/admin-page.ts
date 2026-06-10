@@ -12,163 +12,73 @@ export const ADMIN_HTML = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sellfox 管理控制台</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #0f1117; --surface: #1a1d27; --border: #2a2d3a;
-  --text: #e1e4ed; --text-muted: #8b8fa3; --accent: #4f8fff;
-  --green: #34d399; --yellow: #fbbf24; --red: #f87171;
-  --radius: 8px; --transition: 150ms ease;
-}
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-.container { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 12px; }
-h1 { font-size: 1.5rem; font-weight: 600; }
-.btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 16px; border-radius: var(--radius); font-size: 0.875rem;
-  font-weight: 500; cursor: pointer; border: 1px solid transparent;
-  transition: background var(--transition), opacity var(--transition);
-}
-.btn:hover { opacity: 0.85; }
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-outline { background: transparent; border-color: var(--border); color: var(--text); }
-.btn-outline:hover { background: var(--surface); }
-.btn-danger { background: transparent; border-color: var(--red); color: var(--red); }
-.btn-danger:hover { background: var(--red); color: #fff; }
-.btn-sm { padding: 4px 10px; font-size: 0.75rem; }
-.btn-xs { padding: 2px 8px; font-size: 0.7rem; }
-.tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
-.tab-btn {
-  padding: 10px 20px; font-size: 0.875rem; font-weight: 500; cursor: pointer;
-  background: transparent; border: none; color: var(--text-muted);
-  border-bottom: 2px solid transparent; transition: all var(--transition);
-}
-.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-.tab-btn:hover { color: var(--text); }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
-.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; }
-.stat-card .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-.stat-card .value { font-size: 1.75rem; font-weight: 700; }
-.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
-table { width: 100%; border-collapse: collapse; }
-th { text-align: left; padding: 10px 14px; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
-td { padding: 10px 14px; font-size: 0.85rem; border-bottom: 1px solid var(--border); }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(255,255,255,0.02); }
-.badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 500; }
-.badge-green { background: rgba(52,211,153,0.15); color: var(--green); }
-.badge-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
-.badge-gray { background: rgba(139,143,163,0.15); color: var(--text-muted); }
-.badge-accent { background: rgba(79,143,255,0.15); color: var(--accent); }
-.toggle { position: relative; display: inline-block; width: 40px; height: 22px; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle .slider { position: absolute; cursor: pointer; inset: 0; background: #3a3d4a; border-radius: 22px; transition: var(--transition); }
-.toggle .slider::before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: var(--transition); }
-.toggle input:checked + .slider { background: var(--accent); }
-.toggle input:checked + .slider::before { transform: translateX(18px); }
-.reveal { cursor: pointer; user-select: none; color: var(--text-muted); padding: 0 4px; }
-.reveal:hover { color: var(--text); }
-.actions { display: flex; gap: 6px; flex-wrap: wrap; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 520px; max-width: 95vw; max-height: 85vh; overflow-y: auto; }
-.modal h2 { margin-bottom: 16px; font-size: 1.1rem; }
-.form-group { margin-bottom: 14px; }
-.form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
-.form-group input, .form-group textarea { width: 100%; padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 0.875rem; }
-.form-group textarea { resize: vertical; min-height: 60px; }
-.form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
-.form-row { display: flex; gap: 12px; }
-.form-row .form-group { flex: 1; }
-.form-inline { display: flex; align-items: center; gap: 10px; }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
-.empty { text-align: center; padding: 48px 20px; color: var(--text-muted); }
-.toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 20px; font-size: 0.875rem; z-index: 200; box-shadow: 0 4px 16px rgba(0,0,0,0.4); animation: fadeIn 0.2s ease; }
-.toast-error { border-color: var(--red); }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.mono { font-family: "SF Mono", "Consolas", "Monaco", monospace; font-size: 0.78rem; }
-.copy-btn { cursor: pointer; color: var(--text-muted); background: none; border: none; font-size: 0.85rem; padding: 2px 6px; }
-.copy-btn:hover { color: var(--accent); }
-.key-display { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-.key-display code { flex: 1; word-break: break-all; font-size: 0.82rem; }
-.flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; } .gap-1 { gap: 4px; } .gap-2 { gap: 8px; } .gap-3 { gap: 12px; }
-.w-full { width: 100%; } .h-full { height: 100%; } .flex-1 { flex: 1; } .shrink-0 { flex-shrink: 0; }
-.rounded { border-radius: 4px; } .rounded-lg { border-radius: 8px; }
-.text-sm { font-size: 0.875rem; } .text-xs { font-size: 0.75rem; } .font-medium { font-weight: 500; }
-.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cursor-pointer { cursor: pointer; }
-.hidden { display: none; }
-.overflow-hidden { overflow: hidden; } .overflow-y-auto { overflow-y: auto; }
-.border-t { border-top: 1px solid var(--border); }
-.pt-3 { padding-top: 12px; } .pt-4 { padding-top: 16px; } .pb-3 { padding-bottom: 12px; }
-.px-2 { padding-left: 8px; padding-right: 8px; } .px-3 { padding-left: 12px; padding-right: 12px; } .px-4 { padding-left: 16px; padding-right: 16px; }
-.py-0\\.5 { padding-top: 2px; padding-bottom: 2px; } .py-1\\.5 { padding-top: 6px; padding-bottom: 6px; } .py-2 { padding-top: 8px; padding-bottom: 8px; }
-.mt-3 { margin-top: 12px; } .mb-3 { margin-bottom: 12px; } .ml-auto { margin-left: auto; }
-.space-y-2 > * + * { margin-top: 8px; }
-.grid { display: grid; } .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.relative { position: relative; } .absolute { position: absolute; }
-.left-3 { left: 12px; } .top-1\\/2 { top: 50%; }
-.-translate-y-1\\/2 { transform: translateY(-50%); }
-.transition-colors { transition: color 0.15s, background-color 0.15s, border-color 0.15s; }
-.transition-transform { transition: transform 0.15s; }
-.transition-opacity { transition: opacity 0.15s; }
-.rotate-90 { transform: rotate(90deg); }
-.hover\\:bg-white\\/\\[0\\.02\\]:hover { background: rgba(255,255,255,0.02); }
-.hover\\:bg-white\\/\\[0\\.04\\]:hover { background: rgba(255,255,255,0.04); }
-.hover\\:opacity-85:hover { opacity: 0.85; }
-</style>
+<link rel="stylesheet" href="/admin.css">
 </head>
-<body>
-<div class="container">
-  <header>
-    <h1>Sellfox 管理控制台</h1>
-    <div style="display:flex;gap:8px;">
+<body class="bg-background text-foreground min-h-screen font-sans antialiased">
+<div class="max-w-[1200px] mx-auto px-5 py-6">
+  <header class="flex justify-between items-center mb-1 flex-wrap gap-3">
+    <h1 class="text-2xl font-semibold tracking-tight">Sellfox 管理控制台</h1>
+    <div class="flex gap-2">
       <button class="btn btn-outline btn-sm" onclick="refresh()">刷新</button>
     </div>
   </header>
 
-  <div class="tabs">
+  <div class="flex gap-0 mb-5 border-b border-border">
     <button class="tab-btn active" onclick="switchTab('credentials')">凭据管理</button>
     <button class="tab-btn" onclick="switchTab('keys')">密钥权限</button>
   </div>
 
   <!-- Tab: Credentials -->
-  <div id="tab-credentials" class="tab-content active">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+  <div id="tab-credentials" class="tab-content block">
+    <div class="flex justify-end mb-4">
       <button class="btn btn-primary btn-sm" onclick="showAddCredModal()">+ 添加凭据</button>
     </div>
-    <div class="stats">
-      <div class="stat-card"><div class="label">凭据总数</div><div class="value" style="color:var(--accent)" id="statCredTotal">-</div></div>
-      <div class="stat-card"><div class="label">已启用</div><div class="value" style="color:var(--green)" id="statCredEnabled">-</div></div>
-      <div class="stat-card"><div class="label">Token 有效</div><div class="value" style="color:var(--yellow)" id="statCredToken">-</div></div>
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3 mb-6">
+      <div class="stat-card"><div class="stat-label">凭据总数</div><div class="stat-value text-primary" id="statCredTotal">-</div></div>
+      <div class="stat-card"><div class="stat-label">已启用</div><div class="stat-value text-green-400" id="statCredEnabled">-</div></div>
+      <div class="stat-card"><div class="stat-label">Token 有效</div><div class="stat-value text-amber-400" id="statCredToken">-</div></div>
     </div>
     <div class="table-wrap">
-      <table>
-        <thead><tr><th>Client ID</th><th>Secret</th><th>Token</th><th>最近使用</th><th>状态</th><th>操作</th></tr></thead>
+      <table class="w-full border-collapse">
+        <thead><tr>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Client ID</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Secret</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Token</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">最近使用</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">状态</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">操作</th>
+        </tr></thead>
         <tbody id="tbodyCreds"></tbody>
       </table>
     </div>
   </div>
 
   <!-- Tab: Keys -->
-  <div id="tab-keys" class="tab-content">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <span style="font-size:0.78rem;color:var(--text-muted)" id="shopSyncInfo"></span>
-      <div style="display:flex;gap:8px;">
+  <div id="tab-keys" class="tab-content hidden">
+    <div class="flex justify-between items-center mb-4">
+      <span class="text-xs text-muted-foreground" id="shopSyncInfo"></span>
+      <div class="flex gap-2">
         <button class="btn btn-outline btn-sm" onclick="syncShops()" id="btnSyncShops">同步店铺</button>
         <button class="btn btn-primary btn-sm" onclick="showAddKeyModal()">+ 添加密钥</button>
       </div>
     </div>
-    <div class="stats">
-      <div class="stat-card"><div class="label">密钥总数</div><div class="value" style="color:var(--accent)" id="statKeyTotal">-</div></div>
-      <div class="stat-card"><div class="label">管理员</div><div class="value" style="color:var(--yellow)" id="statKeyAdmin">-</div></div>
-      <div class="stat-card"><div class="label">已分配权限</div><div class="value" style="color:var(--green)" id="statKeyPerms">-</div></div>
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3 mb-6">
+      <div class="stat-card"><div class="stat-label">密钥总数</div><div class="stat-value text-primary" id="statKeyTotal">-</div></div>
+      <div class="stat-card"><div class="stat-label">管理员</div><div class="stat-value text-amber-400" id="statKeyAdmin">-</div></div>
+      <div class="stat-card"><div class="stat-label">已分配权限</div><div class="stat-value text-green-400" id="statKeyPerms">-</div></div>
     </div>
     <div class="table-wrap">
-      <table>
-        <thead><tr><th>序号</th><th>姓名</th><th>密钥</th><th>备注</th><th>店铺数</th><th>管理员</th><th>创建时间</th><th>操作</th></tr></thead>
+      <table class="w-full border-collapse">
+        <thead><tr>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">序号</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">姓名</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">密钥</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">备注</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">店铺数</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">管理员</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">创建时间</th>
+          <th class="text-left px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">操作</th>
+        </tr></thead>
         <tbody id="tbodyKeys"></tbody>
       </table>
     </div>
@@ -207,8 +117,12 @@ function tokenExpiry(exp) { if (!exp) return null; var r = exp - (Date.now()/100
 var currentTab = 'credentials';
 function switchTab(name) {
   currentTab = name;
-  document.getElementById('tab-credentials').classList.toggle('active', name === 'credentials');
-  document.getElementById('tab-keys').classList.toggle('active', name === 'keys');
+  var credTab = document.getElementById('tab-credentials');
+  var keysTab = document.getElementById('tab-keys');
+  credTab.classList.toggle('hidden', name !== 'credentials');
+  credTab.classList.toggle('block', name === 'credentials');
+  keysTab.classList.toggle('hidden', name !== 'keys');
+  keysTab.classList.toggle('block', name === 'keys');
   var btns = document.querySelectorAll('.tab-btn');
   btns[0].classList.toggle('active', name === 'credentials');
   btns[1].classList.toggle('active', name === 'keys');
@@ -239,14 +153,16 @@ function renderCreds(data) {
   document.getElementById('statCredEnabled').textContent = data.stats.enabled;
   document.getElementById('statCredToken').textContent = data.stats.with_valid_token;
   var tbody = document.getElementById('tbodyCreds');
-  if (!data.credentials.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty">暂无凭据</div></td></tr>'; return; }
+  if (!data.credentials.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">暂无凭据</div></td></tr>'; return; }
   tbody.innerHTML = data.credentials.map(function(c){
-    var tl = c.token_valid ? '<span class="badge badge-green">有效</span> <span style="font-size:0.7rem;color:var(--text-muted)">' + esc(tokenExpiry(c.expires_at) || '') + '</span>' : c.access_token ? '<span class="badge badge-yellow">已过期</span>' : '<span class="badge badge-gray">无缓存</span>';
-    return '<tr><td>' + mask(c.client_id, c._showId) + '<span class="reveal" onclick="toggleCredReveal(\\'' + esc(c.client_id) + '\\',\\'id\\')">' + (c._showId ? '🙈' : '👁') + '</span></td>' +
-      '<td>' + mask(c.client_secret, c._showSecret) + '<span class="reveal" onclick="toggleCredReveal(\\'' + esc(c.client_id) + '\\',\\'secret\\')">' + (c._showSecret ? '🙈' : '👁') + '</span></td>' +
-      '<td>' + tl + '</td><td style="font-size:0.8rem;color:var(--text-muted)">' + timeAgo(c.last_used_at) + '</td>' +
-      '<td><label class="toggle"><input type="checkbox" ' + (c.enabled ? 'checked' : '') + ' onchange="toggleCred(\\'' + esc(c.client_id) + '\\', this.checked)"><span class="slider"></span></label></td>' +
-      '<td><div class="actions"><button class="btn btn-outline btn-sm" onclick="clearCredToken(\\'' + esc(c.client_id) + '\\')">清 Token</button><button class="btn btn-danger btn-sm" onclick="removeCred(\\'' + esc(c.client_id) + '\\')">删除</button></div></td></tr>';
+    var tl = c.token_valid ? '<span class="badge badge-green">有效</span> <span class="text-[0.7rem] text-muted-foreground">' + esc(tokenExpiry(c.expires_at) || '') + '</span>' : c.access_token ? '<span class="badge badge-amber">已过期</span>' : '<span class="badge badge-muted">无缓存</span>';
+    return '<tr>' +
+      '<td class="px-4 py-2.5 text-sm border-b border-border">' + mask(c.client_id, c._showId) + '<span class="reveal" onclick="toggleCredReveal(\\'' + esc(c.client_id) + '\\',\\'id\\')">' + (c._showId ? '🙈' : '👁') + '</span></td>' +
+      '<td class="px-4 py-2.5 text-sm border-b border-border">' + mask(c.client_secret, c._showSecret) + '<span class="reveal" onclick="toggleCredReveal(\\'' + esc(c.client_id) + '\\',\\'secret\\')">' + (c._showSecret ? '🙈' : '👁') + '</span></td>' +
+      '<td class="px-4 py-2.5 text-sm border-b border-border">' + tl + '</td>' +
+      '<td class="px-4 py-2.5 text-sm text-muted-foreground border-b border-border">' + timeAgo(c.last_used_at) + '</td>' +
+      '<td class="px-4 py-2.5 border-b border-border"><label class="toggle-track"><input type="checkbox" ' + (c.enabled ? 'checked' : '') + ' onchange="toggleCred(\\'' + esc(c.client_id) + '\\', this.checked)"><span class="toggle-thumb"></span></label></td>' +
+      '<td class="px-4 py-2.5 border-b border-border"><div class="flex gap-1.5 flex-wrap"><button class="btn btn-outline btn-sm" onclick="clearCredToken(\\'' + esc(c.client_id) + '\\')">清 Token</button><button class="btn btn-danger btn-sm" onclick="removeCred(\\'' + esc(c.client_id) + '\\')">删除</button></div></td></tr>';
   }).join('');
 }
 
@@ -268,10 +184,10 @@ async function removeCred(cid) {
 
 function showAddCredModal() {
   var overlay = document.createElement('div'); overlay.className = 'modal-overlay';
-  overlay.innerHTML = '<div class="modal"><h2>添加凭据</h2>' +
-    '<div class="form-group"><label>Client ID</label><input id="addCredId" placeholder="SELLFOX_CLIENT_ID"></div>' +
-    '<div class="form-group"><label>Client Secret</label><input id="addCredSecret" type="password" placeholder="SELLFOX_CLIENT_SECRET"></div>' +
-    '<div class="modal-actions"><button class="btn btn-outline btn-sm" onclick="closeModal()">取消</button><button class="btn btn-primary btn-sm" onclick="addCred()">确认添加</button></div></div>';
+  overlay.innerHTML = '<div class="modal"><h2 class="text-lg font-semibold mb-4">添加凭据</h2>' +
+    '<div class="form-group"><label class="form-label">Client ID</label><input id="addCredId" class="form-input" placeholder="SELLFOX_CLIENT_ID"></div>' +
+    '<div class="form-group"><label class="form-label">Client Secret</label><input id="addCredSecret" type="password" class="form-input" placeholder="SELLFOX_CLIENT_SECRET"></div>' +
+    '<div class="flex gap-2 justify-end mt-5"><button class="btn btn-outline btn-sm" onclick="closeModal()">取消</button><button class="btn btn-primary btn-sm" onclick="addCred()">确认添加</button></div></div>';
   overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
   document.body.appendChild(overlay); document.getElementById('addCredId').focus();
 }
@@ -294,18 +210,18 @@ function renderKeys(data) {
   document.getElementById('statKeyAdmin').textContent = data.stats.admin_count;
   document.getElementById('statKeyPerms').textContent = data.stats.with_permissions;
   var tbody = document.getElementById('tbodyKeys');
-  if (!data.keys.length) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty">暂无密钥</div></td></tr>'; return; }
+  if (!data.keys.length) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">暂无密钥</div></td></tr>'; return; }
   tbody.innerHTML = data.keys.map(function(k){
-    var adminBadge = k.is_admin ? '<span class="badge badge-accent">管理员</span>' : '<span class="badge badge-gray">普通</span>';
+    var adminBadge = k.is_admin ? '<span class="badge badge-accent">管理员</span>' : '<span class="badge badge-muted">普通</span>';
     return '<tr>' +
-      '<td>' + (k.seq || '-') + '</td>' +
-      '<td>' + esc(k.name || '-') + '</td>' +
-      '<td><span class="mono">' + esc(k.key_value.substring(0,12)) + '***</span> <button class="copy-btn" onclick="copyKey(\\'' + esc(k.key_value) + '\\')">📋</button></td>' +
-      '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(k.memo||'') + '">' + esc(k.memo || '-') + '</td>' +
-      '<td><span class="badge badge-green">' + (k.shop_count || 0) + '</span></td>' +
-      '<td><label class="toggle"><input type="checkbox" ' + (k.is_admin ? 'checked' : '') + ' onchange="toggleKeyAdmin(\\'' + esc(k.key_value) + '\\', this.checked)"><span class="slider"></span></label></td>' +
-      '<td style="font-size:0.78rem;color:var(--text-muted)">' + esc(k.created_at || '-') + '</td>' +
-      '<td><div class="actions">' +
+      '<td class="px-4 py-2.5 text-sm border-b border-border">' + (k.seq || '-') + '</td>' +
+      '<td class="px-4 py-2.5 text-sm border-b border-border">' + esc(k.name || '-') + '</td>' +
+      '<td class="px-4 py-2.5 text-sm border-b border-border"><span class="mono">' + esc(k.key_value.substring(0,12)) + '***</span> <button class="copy-btn" onclick="copyKey(\\'' + esc(k.key_value) + '\\')">📋</button></td>' +
+      '<td class="px-4 py-2.5 text-sm border-b border-border max-w-[140px] overflow-hidden text-ellipsis whitespace-nowrap" title="' + esc(k.memo||'') + '">' + esc(k.memo || '-') + '</td>' +
+      '<td class="px-4 py-2.5 border-b border-border"><span class="badge badge-green">' + (k.shop_count || 0) + '</span></td>' +
+      '<td class="px-4 py-2.5 border-b border-border"><label class="toggle-track"><input type="checkbox" ' + (k.is_admin ? 'checked' : '') + ' onchange="toggleKeyAdmin(\\'' + esc(k.key_value) + '\\', this.checked)"><span class="toggle-thumb"></span></label></td>' +
+      '<td class="px-4 py-2.5 text-sm text-muted-foreground border-b border-border">' + esc(k.created_at || '-') + '</td>' +
+      '<td class="px-4 py-2.5 border-b border-border"><div class="flex gap-1.5 flex-wrap">' +
         '<button class="btn btn-outline btn-xs" onclick="copyKey(\\'' + esc(k.key_value) + '\\')">复制</button>' +
         '<button class="btn btn-outline btn-xs" onclick="showPermModal(\\'' + esc(k.key_value) + '\\',\\'' + esc(k.name || k.key_value) + '\\')">权限</button>' +
         '<button class="btn btn-danger btn-xs" onclick="removeKey(\\'' + esc(k.key_value) + '\\')">删除</button>' +
@@ -331,15 +247,15 @@ async function removeKey(kv) {
 
 function showAddKeyModal() {
   var overlay = document.createElement('div'); overlay.className = 'modal-overlay';
-  overlay.innerHTML = '<div class="modal"><h2>添加密钥</h2>' +
-    '<div class="form-row"><div class="form-group"><label>序号</label><input id="addKeySeq" type="number" value="0"></div>' +
-    '<div class="form-group"><label>姓名</label><input id="addKeyName" placeholder="如：张三"></div></div>' +
-    '<div class="form-group"><label>备注</label><input id="addKeyMemo" placeholder="用途说明"></div>' +
-    '<div class="form-group"><div class="form-inline"><label style="margin:0;">密钥</label>' +
+  overlay.innerHTML = '<div class="modal"><h2 class="text-lg font-semibold mb-4">添加密钥</h2>' +
+    '<div class="flex gap-3"><div class="form-group flex-1"><label class="form-label">序号</label><input id="addKeySeq" type="number" value="0" class="form-input"></div>' +
+    '<div class="form-group flex-1"><label class="form-label">姓名</label><input id="addKeyName" class="form-input" placeholder="如：张三"></div></div>' +
+    '<div class="form-group"><label class="form-label">备注</label><input id="addKeyMemo" class="form-input" placeholder="用途说明"></div>' +
+    '<div class="form-group"><div class="flex items-center gap-2.5"><label class="form-label mb-0">密钥</label>' +
       '<button class="btn btn-outline btn-xs" onclick="genKey()">自动生成</button></div>' +
-      '<div class="key-display"><code id="addKeyValue"></code></div></div>' +
-    '<div class="form-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="addKeyAdmin"> 管理员</label></div>' +
-    '<div class="modal-actions"><button class="btn btn-outline btn-sm" onclick="closeModal()">取消</button><button class="btn btn-primary btn-sm" onclick="addKey()">确认添加</button></div></div>';
+      '<div class="key-display"><code id="addKeyValue" class="flex-1 break-all text-sm"></code></div></div>' +
+    '<div class="form-group"><label class="flex items-center gap-2 cursor-pointer text-sm"><input type="checkbox" id="addKeyAdmin" class="w-4 h-4 rounded border-input accent-primary"> 管理员</label></div>' +
+    '<div class="flex gap-2 justify-end mt-5"><button class="btn btn-outline btn-sm" onclick="closeModal()">取消</button><button class="btn btn-primary btn-sm" onclick="addKey()">确认添加</button></div></div>';
   overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
   document.body.appendChild(overlay); genKey(); document.getElementById('addKeyName').focus();
 }
@@ -407,11 +323,10 @@ async function showPermModal(kv, name) {
   permKeyValue = kv; permUserName = name || kv;
   var overlay = document.createElement('div');
   overlay.className = 'modal-overlay'; overlay.id = 'permModalOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:16px;';
   overlay.addEventListener('click', function(e){ if (e.target === overlay) closePermModal(); });
   var card = document.createElement('div');
-  card.style.cssText = 'background:#1a1d27;border:1px solid #2a2d3a;border-radius:12px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);width:720px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;padding:24px;';
-  card.innerHTML = '<div class="text-center py-8" style="padding:32px;text-align:center;color:#8b8fa3">加载中...</div>';
+  card.className = 'modal w-[720px] max-h-[90vh] flex flex-col';
+  card.innerHTML = '<div class="text-center py-8 text-muted-foreground">加载中...</div>';
   overlay.appendChild(card); document.body.appendChild(overlay);
   try {
     var d1 = await request(SHOPS_API, 'GET');
@@ -423,7 +338,7 @@ async function showPermModal(kv, name) {
     permAuthorized = {};
     (d2.shops||[]).forEach(function(s){ permAuthorized[s.shop_id] = true; });
     card.innerHTML = buildPermModalHTML();
-  } catch(e) { card.innerHTML = '<div class="text-center py-8" style="padding:32px;text-align:center;color:#f87171">加载失败: ' + esc(e.message) + '</div>'; }
+  } catch(e) { card.innerHTML = '<div class="text-center py-8 text-destructive">加载失败: ' + esc(e.message) + '</div>'; }
 }
 
 function buildPermModalHTML() {
@@ -433,46 +348,47 @@ function buildPermModalHTML() {
     var shopsHTML = g.shops.map(function(s) {
       var checked = permAuthorized[s.shop_id] ? ' checked' : '';
       if (checked) { groupSelected++; totalSelected++; }
-      return '<label style="display:flex;align-items:center;gap:8px;padding:6px 8px;cursor:pointer;border-radius:4px" title="' + esc(s.shop_name) + ' (ID:' + esc(s.shop_id) + ')">' +
-        '<input type="checkbox" value="' + esc(s.shop_id) + '"' + checked + ' class="perm-shop-cb" data-group="' + gi + '" onchange="updatePermCounts()" style="width:16px;height:16px;accent-color:#4f8fff">' +
-        '<span style="font-size:13px;color:#e1e4ed;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(s.shop_name) + '</span></label>';
+      return '<label class="flex items-center gap-2 px-2 py-1.5 cursor-pointer rounded hover:bg-accent/50 transition-colors" title="' + esc(s.shop_name) + ' (ID:' + esc(s.shop_id) + ')">' +
+        '<input type="checkbox" value="' + esc(s.shop_id) + '"' + checked + ' class="perm-shop-cb w-4 h-4 rounded border-input accent-primary" data-group="' + gi + '" onchange="updatePermCounts()">' +
+        '<span class="text-[13px] text-foreground truncate">' + esc(s.shop_name) + '</span></label>';
     }).join('');
-    var allChecked = groupSelected === g.shops.length;
-    return '<div class="perm-group" data-group="' + gi + '" style="border:1px solid #2a2d3a;border-radius:8px;overflow:hidden">' +
-      '<button style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;background:transparent;border:none;color:#e1e4ed;cursor:pointer;text-align:left" onclick="toggleGroup(' + gi + ')">' +
-        '<span class="perm-chevron' + (g.expanded ? ' rotate-90' : '') + '" style="display:inline-block;transition:transform 0.15s;color:#8b8fa3">▶</span>' +
-        '<input type="checkbox" class="perm-group-cb" ' + (allChecked ? 'checked' : '') + ' data-group="' + gi + '" onclick="event.stopPropagation(); toggleGroupAll(' + gi + ', this.checked)" onchange="updatePermCounts()" style="width:16px;height:16px;accent-color:#4f8fff">' +
-        '<span style="font-size:14px;font-weight:500">' + esc(g.region) + '</span>' +
-        '<span style="padding:1px 8px;border-radius:12px;font-size:11px;background:rgba(255,255,255,0.06);color:#8b8fa3">' + g.shops.length + '</span>' +
-        (groupSelected > 0 ? '<span style="padding:1px 8px;border-radius:12px;font-size:11px;background:rgba(79,143,255,0.15);color:#4f8fff;margin-left:auto">' + groupSelected + '</span>' : '') +
+    var allChecked = groupSelected === g.shops.length && g.shops.length > 0;
+    return '<div class="perm-group border border-border rounded-lg overflow-hidden" data-group="' + gi + '">' +
+      '<button class="w-full flex items-center gap-3 px-4 py-2.5 bg-transparent border-none text-foreground cursor-pointer text-left hover:bg-accent/30 transition-colors" onclick="toggleGroup(' + gi + ')">' +
+        '<span class="perm-chevron inline-block transition-transform duration-150 text-muted-foreground' + (g.expanded ? ' rotate-90' : '') + '">▶</span>' +
+        '<input type="checkbox" class="perm-group-cb w-4 h-4 rounded border-input accent-primary" ' + (allChecked ? 'checked' : '') + ' data-group="' + gi + '" onclick="event.stopPropagation(); toggleGroupAll(' + gi + ', this.checked)" onchange="updatePermCounts()">' +
+        '<span class="text-sm font-medium">' + esc(g.region) + '</span>' +
+        '<span class="px-2 py-0.5 rounded-full text-[11px] bg-foreground/5 text-muted-foreground">' + g.shops.length + '</span>' +
+        (groupSelected > 0 ? '<span class="ml-auto px-2 py-0.5 rounded-full text-[11px] bg-primary/15 text-primary">' + groupSelected + '</span>' : '') +
       '</button>' +
       '<div class="perm-group-body' + (g.expanded ? '' : ' hidden') + '">' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 16px 12px">' + shopsHTML + '</div>' +
+        '<div class="grid grid-cols-2 gap-1 px-4 pb-3">' + shopsHTML + '</div>' +
       '</div></div>';
   }).join('');
 
   var totalShops = permShops.length;
-  return '<div style="display:flex;flex-direction:column;height:100%">' +
-    '<div style="padding-bottom:16px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
-        '<h2 style="font-size:18px;font-weight:600;color:#e1e4ed">店铺权限</h2>' +
-        '<span style="font-size:14px;color:#8b8fa3">' + esc(permUserName) + '</span>' +
+  return '<div class="flex flex-col h-full">' +
+    '<div class="pb-4">' +
+      '<div class="flex justify-between items-center mb-3">' +
+        '<h2 class="text-lg font-semibold text-foreground">店铺权限</h2>' +
+        '<span class="text-sm text-muted-foreground">' + esc(permUserName) + '</span>' +
       '</div>' +
-      '<div style="display:flex;align-items:center;gap:8px">' +
-        '<div style="position:relative;flex:1">' +
-          '<input id="permSearch" style="width:100%;padding:8px 12px 8px 36px;background:#0f1117;border:1px solid #2a2d3a;border-radius:8px;font-size:14px;color:#e1e4ed" placeholder="搜索店铺..." oninput="filterPermShops()">' +
+      '<div class="flex items-center gap-2">' +
+        '<div class="relative flex-1">' +
+          '<svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>' +
+          '<input id="permSearch" class="w-full pl-9 pr-3 py-2 bg-background border border-input rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background placeholder:text-muted-foreground" placeholder="搜索店铺..." oninput="filterPermShops()">' +
         '</div>' +
-        '<button id="permSelectAllBtn" style="padding:8px 12px;font-size:12px;border:1px solid #2a2d3a;border-radius:8px;background:transparent;color:#e1e4ed;cursor:pointer" onclick="toggleAllVisible()">全选</button>' +
+        '<button id="permSelectAllBtn" class="btn btn-outline btn-sm shrink-0" onclick="toggleAllVisible()">全选</button>' +
       '</div>' +
     '</div>' +
-    '<div style="flex:1;overflow-y:auto;max-height:55vh" class="space-y-2">' +
-      (groupsHTML || '<div style="text-align:center;padding:48px;color:#8b8fa3;font-size:14px">无匹配店铺</div>') +
+    '<div class="flex-1 overflow-y-auto max-h-[55vh] space-y-2">' +
+      (groupsHTML || '<div class="text-center py-12 text-muted-foreground text-sm">无匹配店铺</div>') +
     '</div>' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid #2a2d3a;margin-top:12px">' +
-      '<span style="font-size:14px;color:#8b8fa3">已选 <span id="permSelectedCount" style="color:#4f8fff;font-weight:500">' + totalSelected + '</span> / ' + totalShops + ' 个店铺</span>' +
-      '<div style="display:flex;gap:8px">' +
-        '<button style="padding:8px 16px;font-size:14px;border:1px solid #2a2d3a;border-radius:8px;background:transparent;color:#e1e4ed;cursor:pointer" onclick="closePermModal()">取消</button>' +
-        '<button style="padding:8px 16px;font-size:14px;background:#4f8fff;border:none;border-radius:8px;color:white;cursor:pointer" onclick="savePerms()">保存权限</button>' +
+    '<div class="flex justify-between items-center pt-4 border-t border-border mt-3">' +
+      '<span class="text-sm text-muted-foreground">已选 <span id="permSelectedCount" class="text-primary font-medium">' + totalSelected + '</span> / ' + totalShops + ' 个店铺</span>' +
+      '<div class="flex gap-2">' +
+        '<button class="btn btn-outline btn-sm" onclick="closePermModal()">取消</button>' +
+        '<button class="btn btn-primary btn-sm" onclick="savePerms()">保存权限</button>' +
       '</div>' +
     '</div></div>';
 }

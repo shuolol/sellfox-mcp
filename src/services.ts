@@ -269,6 +269,7 @@ export class SellfoxOpenAPIService {
       next_token_path: spec.next_token_path,
       pagination_mode: spec.pagination_mode,
       extra_headers: spec.headers,
+      max_pages: 5, // <--- 加上这行，强制最多只拉取 5 页
     });
     return makeResult({
       data: page.rows,

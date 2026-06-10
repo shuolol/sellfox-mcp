@@ -1,0 +1,29 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - heading "Sellfox 管理控制台" [level=1] [ref=e4]
+    - button "刷新" [ref=e6] [cursor=pointer]
+  - generic [ref=e7]:
+    - button "凭据管理" [ref=e8] [cursor=pointer]
+    - button "密钥权限" [ref=e9] [cursor=pointer]
+  - generic [ref=e10]:
+    - button "+ 添加凭据" [ref=e12] [cursor=pointer]
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: 凭据总数
+        - generic [ref=e16]: "-"
+      - generic [ref=e17]:
+        - generic [ref=e18]: 已启用
+        - generic [ref=e19]: "-"
+      - generic [ref=e20]:
+        - generic [ref=e21]: Token 有效
+        - generic [ref=e22]: "-"
+    - table [ref=e24]:
+      - rowgroup [ref=e25]:
+        - row "Client ID Secret Token 最近使用 状态 操作" [ref=e26]:
+          - columnheader "Client ID" [ref=e27]
+          - columnheader "Secret" [ref=e28]
+          - columnheader "Token" [ref=e29]
+          - columnheader "最近使用" [ref=e30]
+          - columnheader "状态" [ref=e31]
+          - columnheader "操作" [ref=e32]
+      - rowgroup
